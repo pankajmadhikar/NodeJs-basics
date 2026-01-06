@@ -1,0 +1,25 @@
+{
+  "name": "nodejs-learning",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon index.js"
+  },
+  "homepage": "https://github.com/pankajmadhikar/NodeJs-basics#readme",
+  "bugs": {
+    "url": "https://github.com/pankajmadhikar/NodeJs-basics/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pankajmadhikar/NodeJs-basics.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "dependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
