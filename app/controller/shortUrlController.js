@@ -1,4 +1,3 @@
-import { response } from "express";
 import { ShortUrl } from "../models/ShortUrl.js";
 
 export const createShortUrl = async (req, res) => {
@@ -25,8 +24,6 @@ export const getOriginalUrl = async (req, res) => {
   try {
     const shortCode = req.params.shortUrlCode;
     const originalUrl = await ShortUrl.findOne({ shortUrl: shortCode });
-    console.log("shortCode", shortCode);
-    console.log("originalUrl", originalUrl);
     if (!originalUrl) {
       return res.status(404).json({
         success: false,
