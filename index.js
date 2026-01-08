@@ -2,6 +2,10 @@ import express from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import { createUser } from "./app/controller/userController.js";
+import {
+  createShortUrl,
+  getOriginalUrl,
+} from "./app/controller/shortUrlController.js";
 dotenv.config();
 
 const app = express();
@@ -20,6 +24,8 @@ mongoose
   });
 
 app.post("/createuser", createUser);
+app.post("/createShortUrl", createShortUrl);
+app.get("/:shortUrlCode", getOriginalUrl);
 
 app.listen(PORT, () => {
   console.log("App is running on ", PORT);
