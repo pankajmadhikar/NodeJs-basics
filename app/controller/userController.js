@@ -53,7 +53,7 @@ export const loginUser = async (req, res) => {
     }
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_TOKEN, {
-      expiresIn: "1m",
+      expiresIn: "1h",
     });
 
     console.log("token", token);
@@ -108,6 +108,28 @@ export const updateUser = async (req, res) => {
     return res.status(500).json({
       success: false,
       error: "Internal Server Error",
+    });
+  }
+};
+
+export const getUserInfo = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const userInfo = await UserModel.findById(userId);
+    if (!userInfo) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      user: userInfo,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
     });
   }
 };

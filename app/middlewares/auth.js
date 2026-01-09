@@ -2,6 +2,12 @@ import jwt from "jsonwebtoken";
 
 export const authMiddleware = (req, res, next) => {
   const token = req.headers.authorization;
+  if (!token) {
+    return res.status(404).json({
+      success: false,
+      message: "Token is required",
+    });
+  }
   const accessToken = token.split(" ")[1];
   if (!accessToken) {
     return res.status(404).json({
