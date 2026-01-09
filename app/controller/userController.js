@@ -52,11 +52,13 @@ export const loginUser = async (req, res) => {
       });
     }
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_TOKEN, {
-      expiresIn: "1h",
-    });
-
-    console.log("token", token);
+    const token = jwt.sign(
+      { userId: user._id, userRole: user.role },
+      process.env.JWT_SECRET_TOKEN,
+      {
+        expiresIn: "1h",
+      }
+    );
 
     return res.status(200).json({
       success: true,
