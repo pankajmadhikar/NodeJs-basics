@@ -25,6 +25,21 @@ export const authMiddleware = (req, res, next) => {
       message: "Unauthorized token",
     });
   }
-  req.userId = decodedToken.userId;
+  req.user = decodedToken;
   next();
+};
+
+export const requireRole = (roles) => {
+  return (req, res, next) => {
+    const { userId, role } = req.user;
+    const isValidRole = roles?.find((r) => r === role);
+    console.log("isValidRole", isValidRole);
+    if (!isValidRole) {
+      return res.status(404).json({
+        success: false,
+        message: "You are not authorised to access this role",
+      });
+    }
+    next();
+  };
 };

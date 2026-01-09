@@ -1,10 +1,11 @@
 import { UserModel } from "../models/Users.js";
 import bcrypt from "bcryptjs";
+import { body } from "express-validator";
 import jwt from "jsonwebtoken";
 
 export const createUser = async (req, res) => {
   try {
-    const { name, email, password, age } = req.body;
+    const { name, email, password, age, role } = req.body;
     if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
@@ -18,7 +19,13 @@ export const createUser = async (req, res) => {
         message: "User already exists",
       });
     }
-    const newUser = await UserModel.create({ name, email, password, age });
+    const newUser = await UserModel.create({
+      name,
+      email: email.toLowerCase(),
+      password,
+      age,
+      role,
+    });
     return res.status(201).json({
       success: true,
       message: "User created successfully",
@@ -53,7 +60,7 @@ export const loginUser = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { userId: user._id, userRole: user.role },
+      { userId: user._id, role: user.role },
       process.env.JWT_SECRET_TOKEN,
       {
         expiresIn: "1h",
@@ -75,7 +82,8 @@ export const loginUser = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   try {
-    const id = req.userId;
+    const id = req.user.userId;
+    console.log("id", id);
     if (!id) {
       return res.status(400).json({
         success: false,
@@ -89,8 +97,8 @@ export const updateUser = async (req, res) => {
         message: "User not found",
       });
     }
-    const { name, email, age } = req.body;
-    if (!name || !email || !age) {
+    const { name, age } = req.body;
+    if (!name || !age) {
       return res.status(400).json({
         success: false,
         message: "All fields are required",
@@ -98,7 +106,7 @@ export const updateUser = async (req, res) => {
     }
     const updateUser = await UserModel.findByIdAndUpdate(
       id,
-      { name, email, age },
+      { name, age },
       { new: true }
     );
     return res.status(200).json({
@@ -107,6 +115,7 @@ export const updateUser = async (req, res) => {
       user: updateUser,
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       success: false,
       error: "Internal Server Error",
@@ -127,6 +136,51 @@ export const getUserInfo = async (req, res) => {
     return res.status(200).json({
       success: true,
       user: userInfo,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const getAllUsers = async (req, res) => {
+  try {
+    const allUsers = await UserModel.find();
+    return res.status(200).json({
+      success: true,
+      users: allUsers,
+      totalUsers: allUsers.length,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const deleteUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    if (!userId) {
+      return res.status(404).json({
+        success: false,
+        message: "User id required",
+      });
+    }
+    const isValidUserId = await UserModel.findById(userId);
+    if (!isValidUserId) {
+      return res.status(404).json({
+        success: false,
+        message: "Invalid user id",
+      });
+    }
+    await isValidUserId.delete();
+    res.status(200).json({
+      success: true,
+      message: "User deleted successfully",
     });
   } catch (error) {
     return res.status(500).json({
