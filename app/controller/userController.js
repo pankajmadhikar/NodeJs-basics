@@ -1,7 +1,7 @@
 import { UserModel } from "../models/Users.js";
 import bcrypt from "bcryptjs";
-import { body } from "express-validator";
 import jwt from "jsonwebtoken";
+import { Authservice } from "../services/authservices.js";
 
 export const createUser = async (req, res) => {
   try {
@@ -12,20 +12,20 @@ export const createUser = async (req, res) => {
         message: "All fields are required",
       });
     }
-    const existingUser = await UserModel.findOne({ email });
+    const existingUser = await Authservice.findUserByEmail(email);
     if (existingUser) {
       return res.status(400).json({
         success: false,
         message: "User already exists",
       });
     }
-    const newUser = await UserModel.create({
+    const newUser = await Authservice.createUser(
       name,
-      email: email.toLowerCase(),
+      email,
       password,
       age,
-      role,
-    });
+      role
+    );
     return res.status(201).json({
       success: true,
       message: "User created successfully",
@@ -43,7 +43,7 @@ export const createUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await UserModel.findOne({ email });
+    const user = await Authservice.findUserByEmail(email);
     if (!user) {
       return res.status(400).json({
         success: false,
@@ -83,14 +83,14 @@ export const loginUser = async (req, res) => {
 export const updateUser = async (req, res) => {
   try {
     const id = req.user.userId;
-    console.log("id", id);
+
     if (!id) {
       return res.status(400).json({
         success: false,
         message: "User ID is required",
       });
     }
-    const user = await UserModel.findById(id);
+    const user = await Authservice.findUserById(id);
     if (!user) {
       return res.status(400).json({
         success: false,
@@ -104,11 +104,7 @@ export const updateUser = async (req, res) => {
         message: "All fields are required",
       });
     }
-    const updateUser = await UserModel.findByIdAndUpdate(
-      id,
-      { name, age },
-      { new: true }
-    );
+    const updateUser = await Authservice.updateUserById(id, name, age);
     return res.status(200).json({
       success: true,
       message: "User updated successfully",
@@ -126,7 +122,7 @@ export const updateUser = async (req, res) => {
 export const getUserInfo = async (req, res) => {
   try {
     const userId = req.userId;
-    const userInfo = await UserModel.findById(userId);
+    const userInfo = await Authservice.findUserById(userId);
     if (!userInfo) {
       return res.status(404).json({
         success: false,
@@ -147,7 +143,7 @@ export const getUserInfo = async (req, res) => {
 
 export const getAllUsers = async (req, res) => {
   try {
-    const allUsers = await UserModel.find();
+    const allUsers = await Authservice.findAllActiveUsers();
     return res.status(200).json({
       success: true,
       users: allUsers,
@@ -170,19 +166,20 @@ export const deleteUser = async (req, res) => {
         message: "User id required",
       });
     }
-    const isValidUserId = await UserModel.findById(userId);
+    const isValidUserId = await Authservice.findUserById(userId);
     if (!isValidUserId) {
       return res.status(404).json({
         success: false,
         message: "Invalid user id",
       });
     }
-    await isValidUserId.delete();
+    await Authservice.deleteUserById(isValidUserId.id);
     res.status(200).json({
       success: true,
       message: "User deleted successfully",
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
