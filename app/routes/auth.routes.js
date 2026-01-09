@@ -4,11 +4,11 @@ import {
   updateUser,
 } from "../controller/userController.js";
 import express from "express";
+import { authMiddleware } from "../middlewares/auth.js";
 
 const router = express.Router();
 
 router.post("/signup", createUser);
 router.post("/login", loginUser);
-router.put("/update/:id", updateUser);
 
 export const authRoutes = router;
